@@ -27,12 +27,16 @@ export default defineAppConfig({
     },
     socials: {
       twitter: 'Mike_Rody',
-      instagram: 'atinuxt',
+      instagram: 'michaelsrody',
+
       linkedin: {
         icon: 'uil:linkedin',
         label: 'LinkedIn',
         href: 'https://www.linkedin.com/company/nuxtlabs'
-      }
+      },
+
+      facebook: 'mike.rody',
+      youtube: '@MikeRody'
     },
     form: {
       successMessage: 'Message sent. Thank you!'
