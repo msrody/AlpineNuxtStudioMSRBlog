@@ -1,7 +1,7 @@
 export default defineAppConfig({
   alpine: {
-    title: 'Alpine',
-    description: 'The minimalist blog theme',
+    title: 'MSR Workspace',
+    description: 'MSR Workspace is the output of many hours of figuring things out and explaining them so I can try to remember them next time.',
     image: {
       src: '/social-card-preview.png',
       alt: 'An image showcasing my project.',
@@ -23,7 +23,7 @@ export default defineAppConfig({
       },
       navigation: true, // possible value are : true | false
       alignment: 'center', // possible value are : 'none' | 'left' | 'center' | 'right'
-      message: 'Follow me on' // string that will be displayed in the footer (leave empty or delete to disable)
+      message: 'Other places to check us out.' // string that will be displayed in the footer (leave empty or delete to disable)
     },
     socials: {
       twitter: 'Mike_Rody',
