@@ -3,10 +3,10 @@ export default defineAppConfig({
     title: 'MSR Workspace',
     description: 'MSR Workspace is the output of many hours of figuring things out and explaining them so I can try to remember them next time.',
     image: {
-      src: '/social-card-preview.png',
-      alt: 'An image showcasing my project.',
+      src: '/MikePreaching.jpg',
+      alt: 'Mike speaking in front of a graphical background of dark and light blue.',
       width: 400,
-      height: 300
+      height: 400
     },
     header: {
       position: 'right', // possible value are : | 'left' | 'center' | 'right'
