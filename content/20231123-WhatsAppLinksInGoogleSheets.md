@@ -1,0 +1,191 @@
+---
+layout: default
+head.title: WhatsApp Link Making in Google Sheets
+description: A description of how I've made whatsapp click to send links in Google sheets.
+title: WhatsApp Link Making in Google Sheets
+---
+
+::hero
+---
+image:
+---
+#title
+Making WhatsApp Links in a Google Sheet
+#description
+Some basic things to know about how I put together a list of WhatsApp click to chat links in a Google sheet. This includes a simple explaination of what makes up a click to chat link.  These links are also available for use in other apps, like FB messenger, though that's not discussed here. This also covers  various formulas and techniques used for assembling the whole thing into one formula. 
+
+This is a cursory explanation that could help someone get on track investigating how to do this for themselves or to understand and possibly alter the existing Google sheet. It should also expand one's understanding of complex formulas for manipulating data, particularly text, in Google sheets.
+
+## What's a WhatsApp Click To Chat Link?
+
+*See the [WhatsApp Help Center Article](https://faq.whatsapp.com/5913398998672934) for more details from the source.*
+<br />    
+Basically, a ***Click to Chat Link*** is a link that is made up of three parts as seen here:
+https://wa.me/15555555555?text=urlencodedtext
+
+1. Part One is the URL that links to the WhatsApp server. Of course there are two options.
+   1. https://api.whatsapp.com/send
+   2. https://wa.me/
+   
+    > For our purposes, we'll use the second URL. We'll do this primarily because its structure is slightly more simple to put together in Google Sheets. I have typically used the first url with its minimally more complex structure just because that's what I started with. 
+
+2. The second part of the ***Click to Chat Link*** is the phone number. 
+   1. https://api.whatsapp.com/send?phone=+15555555555
+   2. https://wa.me/15555555555
+
+If the ***wa.me*** style url is used, the number includes the country code, area code, and the number with no symbols or spaces. If the ***api.whatsapp*** url is used, the phone number will include the '+', representing that the number starts with the country code. In this case, the number and message are sent in the url as separate pieces of data. It may all look the same but there is a difference of function in how the data goes to the server, but that's all taken care of by them. All you have to do it format the link correctly depending on which link you use.  
+<br />
+Either of these links will work to start a mesage in WhatsApp to the given number if the number is a WhatsApp number. But what's a whatsapp without a message?  
+
+3. The message data is added at the end of the url. In the case below, the message is, "Hey! Call me." Can you find it there in the url?
+   1. https://api.whatsapp.com/send/15555555555&text=Hey%21%20Call%20me.
+   2. https://wa.me/15555555555?&text=Hey%21%20Call%20me.
+
+It would be nice if adding the message was as simple as adding the number, but this part is a bit more complicated. The message has to be "URL Encoded". What that really means is the text in the url is added along with text representations for each bit of punctuation, space or those non-printing characters, like new lines. When the whole message is encoded it's a little less readable for us, but it is exactly how the server at the other end can quickly read the data.
+<br />  
+To accomplish the message you could learn the basics of URL encoding or do it automatically. I choose the latter method and in google sheets there's a simple formula for that. Of course.  
+<br />  
+<br />  
+
+
+
+# Putting it all togeher in Google Sheets, using formulas.
+
+## URL Encoding in google sheets.
+
+The formula for URL encoding in Google Sheets is done with [ENCODEURL()](https://support.google.com/docs/answer/9199778?hl=en).
+<br />  
+Simply put, the function looks like this:
+```js: 
+=ENCODEURL("Hey! Call me.")
+ouptut: Hey%21%20Call%20me.
+```
+
+
+The formula will do all the work of sorting out the proper encoding so you don't have to remember it all and give the output we saw above. 
+
+  ***
+  >Of course we don't have to include the whole text in the formula. As with any spreadsheet formula, the message could be in it's own cell and one could reference that cell to get the message text encoded.
+  ***
+
+
+## Hyperlink construction
+
+In google sheets, any properly formatted url, like https://google.com will be recognized as a hyperlink and sheets will properly format it as a clickable url.  However if you want to hide a long potentially ugly url under a short sweet descriptive label, then you want to do add one more element to the process. Making the link look nice requires the use of the [HYPERLINK](https://support.google.com/docs/answer/3093313?hl=en&ref_topic=9199554&sjid=14474451098766531421-AP) formula. It combines the url link with a label to hide all the ugliness of a long link.
+<br />  
+If you're sending a short message or, for whatever reason, don't need to hide the link under a short label, by all means don't bother with this part of the process.  
+
+
+## The "&" Amperstand
+
+The URL is ultimately just a string of text that uses letters, numbers and symbols to communicate with servers along the way, as it passes through the internet to the it's final desion. To combine the whole string of text we know how to join the various bits together. In our Google Sheets formula, pieces of text can be joined with an "&" amperstand. There are several ways to combine, join or concatinate text, but for this purpose the "&" amperstand is the easy tool. This can be text typed inside parenthesis in the formula `("text")` itself and or text in another cell referenced in the formula by an address `(A3)` or both `("text" & A3 & "more text")`. What we will do below is join the text of the basic hyperlink url with the phone number from another cell. We'll also join in the url encoded message to get it all in one chunk. 
+
+|   |            A             |           Formula           |          Output           |
+|---|--------------------------|-----------------------------|---------------------------|
+| 1 |       15555555555        | =("https://wa.me/" & A1)    | https://wa.me/15555555555 |
+| 2 |       Hey! Call me.      | =ENCODEURL(A2)              |     Hey%21%20Call%20me    |
+| 3 |                          |                             |                           |
+
+
+
+# Putting it all together
+
+In the basic form we put it all together like this.
+
+|   |            A             |               B             |             C             |
+|---|--------------------------|-----------------------------|---------------------------|
+| 1 |          Number          |         15555555555         |  In the formula below we combine all the parts and get the output at the bottom  |
+| 2 |          Message         |         Hey! Call me.       |  =HYPERLINK(B3&B1&"?text="&(ENCODEURL(B2)))                         |
+| 3 |            URL           |        https://wa.me/       |  https://wa.me/15555555555?text=Hey%21%20Call%20me.                         |
+| 4 |                          |                          |                           |
+| 5 |                          |                          |                           |
+| 6 |                          |                          |                           |
+
+If you want to put your own number into that formula you will have a link to send yourself that message. With the amperstand you can find a way to combine a lot of different parts of text together.  You could break up the message and personalize it with data specific to the individual you are messaging, or any number of other things combinations to build a cool message.
+<br />  
+This is definitly overkill if you only want to send one massage, but what if you have a batch of names and numbers you want to send personal messages to? You can make a nice formula and drag it down a column to capture each row. If you've referenced cells in your formula, like maybe for the message, be sure the references to these cells are locked so they won't change as you drag the formula down ot subsequent rows.  
+<br />
+To do this the unchanging parts of the cell reference must be prefixed with a "$" such as $B$1, which is where our url sits in the example table below. Since the URL will be the same in each formula as we drag it down to subsequent rows we make sure to lock it to $B$1 while our number and reference should remain unlocked.
+
+
+|   | A                       | B                      |  C                     | D                      | E                      | F                      |
+|---| ----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |
+| 1 |        URL              |    https://wa.me/      |  Message               |   "Hi"                 |  "How are you?"        |                        |
+| 2 |                         |                        |  Link formulas below    |  Formula output below |                        |                        |
+| 3 |        Mike             |     123455445555       | =HYPERLINK($B$1&$B3&"?text="&ENCODEURL($D$1& " " & $A3 & ". " & $E$1), A3&"'s WhatsApp Message") |      [Mike's WhatsApp Message Link](https://wa.me/123455445555?text=%22Hi%22%20Mike.%20%22How%20are%20you%3F%22)                  |                        |                        |
+| 4 |        John             |     123456445555       |                        |                        |                        |                        |
+| 5 |        Diego            |     123457445555       |                        |                        |                        |                        |
+| 6 |                         |                        |                        |                        |                        |                        |
+
+
+Now that you have a functional formula in one row, it is reasonable to drag that formula down to fill in the rows below it. Google Sheets takes care of updating the formula for each row and you get a nice link in every row.  
+***
+>If you don't know how to "drag the formula down" you can do it by clicking the formula cell and placing the curser over the bottom righ corner where a small square will appear. If you click on that little square and drag it down, the formula will fill the rows below.
+***
+
+This drag down technique works nice for to quickly adding the formula to serveral rows, but there might be something better if you have a lot of rows to fill.
+
+
+## ARRAYFORMULA - Filling all the rows down a column with one formula.
+If you have 30 or 40 rows to fill, you'll start to wonder if there's a better way to write one formula to cover all the rows below it. Amazingly there is. The basic understanding of an [ARRAYFORMULA](https://support.google.com/docs/answer/3093275?hl=en&sjid=14474451098766531421-AP) is that is takes a range (array or list) of values and causes a formula to act on each successive value in the array. In this case the array will be the values in `A3:B5`.  `A3` represents the top left corner of the grid of values and `B5` is the bottom right corner. So the ARRAYFORMULA will work on those values.  
+>Please check out the [ARRAYFORMULA](https://support.google.com/docs/answer/3093275?hl=en&sjid=14474451098766531421-AP) documentation for more information.  This formula can give you super powers and drive you nuts at times as well. Learn to use it and you'll definitely increase your powers in sheets.
+
+For our purpose we will use the ARRAYFORMULA like this:
+```js:
+=ARRAYFORMULA(HYPERLINK($B$2 & $B3:$B5 & "?text=" & ENCODEURL( $D$1& " " & $A3:$A5 & ". " & $E$1), $A3:$A5&"'s WhatsApp Message"))
+```
+
+In this formula I've added some spaces to make it more obvious what we've changed. The spaces are otherwise irrelivant. You'll notice that some address references which were formerly a single cell reference, like `$B3`, have changed to an array reference like `$B3:$B5`. This tells the array formula to use the unique values of each row in that column array. If all the cells below this arrayformula have no data in them, the arrayformula will fill each cooresponding cell with the appropriate link.  
+<br />
+How cool is that?  
+***
+>It's important to know that if any of the cells below your formula contain data, the formula will give an error because it can't put the output in a cell that has existing data so the whole thing won't work.
+***  
+
+
+# REGEXREPLACE - Cleaning up by the numbers
+
+All this is good if you have phone numbers with no extranious symbols or spaces.  Unfortunately most of the time you get a phone number that look like this:
++1(555)555-5555.  As I pointed out earlier, the whatsapp number needs to be just numbers. Cleaning up a few numbers manually is no problem but if you have to clean up a bunch, you may feel it would have been easier to send the message another way. Google Sheets has a solution for this. It has a number of formulas that use a common programing text manipulation tool called Regex.  Regex is a super capable and complex tool to find, add, remove or match text. Here, we will pragmatically scratch the surface on regex. If you want to know more, there is a lot to know.
+
+There are 3 Regex formulas in Google sheets with their own uses.
+   1. [REGEXMATCH](https://support.google.com/docs/answer/3098292?hl=en&sjid=14474451098766531421-AP)
+   2. [REGEXEXTRACT](https://support.google.com/docs/answer/3098244?sjid=14474451098766531421-AP)
+   3. [REGEXREPLACE](https://support.google.com/docs/answer/3098245?sjid=14474451098766531421-AP)
+
+The Regex formula we will use to clean up our phone number is REGEXREPLACE.  This formula uses a bit of regex code to look for specific item in a string of text, in this case the phone numbers.  When if finds the what the regex instruction code tells it to find, a replacment will be made.  Regex is very powerful and a bit complicated so we'll only cover what we need to get this working in our formula and expose you to the possibilities of these regex formulas in Google Sheets.
+
+```js:
+=(REGEXREPLACE(REGEXREPLACE(B2:B, "[\+\- )(]",),"^0","62"))
++1(205)555-5555 becomes 12055555555
+```
+You'll notice in the formula below, the REGEXREPLACE formula is used twice. We could use a series of cells to put this together step by step, but in this case I prefer to put them both in the same formula. I often work in a series of cells as I refine the process, then compile it all into one formula to take up less space. 
+
+I'm sure if I was a regex guru, I could do this all in one take. I'm not a regex guru for sure, so I search for a list of non-number characters (symbols and spaces) with the inside formula first and I replace them with with nothing, essentially removing them. Using the output of the first REGEXREPLACE formula, inside the parenthesis, we REGEXREPLACE again. This second time we look for a leading "0".  "^" represents the start of the text string or line, this is why it is right in front of the "0". We replace it with the country code "62". For my purposes this works because I know the pattern of numberss comming out of our database. If you're dealing with a different number pattern, country code etc. you'll obviously have to adjust.
+
+But of course an array formula would be nicer for the full column of values.
+
+|  | A                       | B                      |  C                     | D                      | E                      | F                      |
+|--| ----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |
+|1 |      Mike               | +1(205)555-5555        | =ARRAYFORMULA(REGEXREPLACE(REGEXREPLACE(C1:C4, "[\+\- )(]",),"^0","62")) |  12055555555      |                        |                        |
+|2 |      Jimmy              | 062-87-55555        |    62628755555                    |                        |                        |                        |
+|3 |      ChangJi            |  +38 (21-28) 5555      |       3821285555                 |                        |                        |                        |
+|4 |     Jose                |  05555555555           |     15555555555                   |                        |                        |                        |
+
+
+
+
+
+
+
+
+15555555555
+
+=ARRAYFORMULA({Sheet1!A2:A,HYPERLINK(IF(ISBLANK(Sheet1!B2:B),"",("https://api.whatsapp.com/send?phone=+" &(REGEXREPLACE(REGEXREPLACE(Sheet1!B2:B, "[\+\- )(]",),"^0","62"))& "&text=" & (IF(ISBLANK($A$2), "", (ENCODEURL($A$2)))))),"WhatsApp Link for " & Sheet1!A2:A & ". From: " & B3)})
+
+|  | A                       | B                      |  C                     | D                      | E                      | F                      |
+|--| ----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |----------------------- |
+|1 |        Name                 |         Number                 |    Link                    |                        |     Message                   |                        |
+|2 |                         |                        |                        |                        |                        |                        |
+|3 |                         |                        |                        |                        |                        |                        |
+|4 |                         |                        |                        |                        |                        |                        |
