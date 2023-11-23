@@ -5,7 +5,7 @@ export default defineAppConfig({
     image: {
       src: '/MikePreaching.jpg',
       alt: 'Mike speaking in front of a graphical background of dark and light blue.',
-      width: 800,
+      width: 400,
       height: 300
     },
     header: {
